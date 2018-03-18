@@ -26,6 +26,12 @@ RUN echo "extension=sqlsrv.so" >> /etc/opt/rh/rh-php70/php.d/30-sqlsrv.ini && \
 
 RUN  rpm --import https://packages.microsoft.com/keys/microsoft.asc && curl -o /etc/yum.repos.d/mssql-release.repo https://packages.microsoft.com/config/rhel/7/prod.repo && ACCEPT_EULA=Y yum install -y msodbcsql mssql-tools unixODBC-devel && yum -y install python-pip && pip install pymssql && yum clean all -y
 
-RUN useradd -M 1001
-
+ADD ./uid_entrypoint /usr/bin/.
+RUN chown 0:0 /usr/bin/uid_entrypoint && chmod +x /usr/bin/uid_entrypoint && chmod -R g=u /etc/passwd       
 USER 1001
+
+ENV PATH $PATH:/opt/mssql-tools/bin
+
+
+ENTRYPOINT [ "uid_entrypoint" ]
+

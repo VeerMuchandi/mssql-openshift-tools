@@ -9,7 +9,8 @@ It also includes CLI (sqlcmd) in case you want to use command line interface to 
 RUN  rpm --import https://packages.microsoft.com/keys/microsoft.asc && curl -o /etc/yum.repos.d/mssql-release.repo https://packages.microsoft.com/config/rhel/7/prod.repo && ACCEPT_EULA=Y yum install -y msodbcsql mssql-tools unixODBC-devel && yum -y install python-pip && pip install pymssql && yum clean all -y
 ```
 
-**NOTE** MS SQL connectivity requires the image to run as a specific user that is available on the container. Hence you see that the user `1001` is added with `RUN useradd` command. This also means that the application needs to be built and deployed wiwith SCC such as `nonroot` or `anyuid`. 
+Sqlcmd requires the user running the command to be part of `/etc/passwd`. Hence the entrypoint has been changed to `uid_entrypoint` that adds the random user assigned by the user to `/etc/passwd` with username `container` when the container comes up. This allows container to be used with OpenShift.
+
 
 ## Building this container
 
@@ -45,8 +46,6 @@ php7       docker-registry.default.svc:5000/mstest/php7       latest    10 hours
 ```
 
 ## Using this image to deploy an application
-
-**NOTE** Ensure that administrator has set up `nonroot` SCC to the `default` and `builder` service accounts.
 
 Now you can deploy an application in the `mstest` project to your the customized S2I builder image as follows:
 
